@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolve }
+		from '$app/paths';
 
 	import FloatingGallery
 		from '$lib/components/three/FloatingGallery.svelte';
@@ -32,15 +34,15 @@
 
 	<div class="links">
 
-		<a href="/">
+		<a href={resolve('/')}>
 			link1
 		</a>
 
-		<a href="/">
+		<a href={resolve('/')}>
 			link2
 		</a>
 
-		<a href="/">
+		<a href={resolve('/')}>
 			link3
 		</a>
 

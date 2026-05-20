@@ -572,6 +572,14 @@
 							true
 						);
 					}
+                    if (
+                        relativeZ <
+                        -corridorLength
+                    ) {
+
+                        mesh.position.z +=
+                            corridorLength;
+                    }
 
 					/*
 						DISTANCE
