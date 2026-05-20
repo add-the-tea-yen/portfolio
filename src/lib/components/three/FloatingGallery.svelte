@@ -43,7 +43,11 @@
 				1000
 			);
 
-		camera.position.set(0, 0, 0);
+		camera.position.set(
+			0,
+			0,
+			0
+		);
 
 		/*
 			RENDERER
@@ -51,6 +55,7 @@
 
 		const renderer =
 			new THREE.WebGLRenderer({
+
 				antialias: true,
 				alpha: true
 			});
@@ -87,7 +92,6 @@
 
 		/*
 			AUTO IMPORT IMAGES
-			FROM static/images
 		*/
 
 		const imageModules =
@@ -101,7 +105,7 @@
 			);
 
 		/*
-			SHUFFLE ORDER
+			IMAGE URLS
 		*/
 
 		const imageUrls =
@@ -133,6 +137,7 @@
 
 								loader.load(
 									url,
+
 									(texture) => {
 
 										texture.colorSpace =
@@ -156,7 +161,7 @@
 			textures.length;
 
 		/*
-			DYNAMIC DENSITY
+			DENSITY
 		*/
 
 		const densityFactor =
@@ -177,7 +182,7 @@
 			densityFactor;
 
 		/*
-			CORRIDOR LENGTH
+			CORRIDOR
 		*/
 
 		const corridorLength =
@@ -203,30 +208,21 @@
 		const cards: Card[] = [];
 
 		/*
-			RANDOMIZE CARD
+			RANDOMIZE
 		*/
 
 		function randomizeCard(
-			card: Card,
-			resetZ = false
+			card: Card
 		) {
 
 			const {
 				mesh
 			} = card;
 
-			/*
-				ANGLE
-			*/
-
 			const angle =
 				Math.random() *
 				Math.PI *
 				2;
-
-			/*
-				RADIUS
-			*/
 
 			const radius =
 				radialSpread *
@@ -244,16 +240,6 @@
 				(Math.random() -
 					0.5) *
 				(isMobile ? 2.4 : 3.8);
-
-			/*
-				INFINITE DEPTH
-			*/
-
-			if (resetZ) {
-
-				mesh.position.z -=
-					corridorLength;
-			}
 
 			/*
 				SUBTLE OFFSET
@@ -285,7 +271,7 @@
 			card.baseScale =
 				Math.random() *
 					0.15 +
-				0.72;
+				0.83;
 		}
 
 		/*
@@ -305,7 +291,7 @@
 				tex.image;
 
 			/*
-				IMAGE SCALE
+				IMAGE SIZE
 			*/
 
 			const scale =
@@ -327,8 +313,8 @@
 
 			const maxHeight =
 				isMobile
-					? 1
-					: 1.7;
+					? 1.1
+					: 1.9;
 
 			if (
 				height > maxHeight
@@ -439,6 +425,10 @@
 		let targetScroll = 0;
 		let currentScroll = 0;
 
+		/*
+			DESKTOP WHEEL
+		*/
+
 		window.addEventListener(
 			'wheel',
 			(e) => {
@@ -446,6 +436,46 @@
 				targetScroll +=
 					e.deltaY *
 					0.016;
+
+			},
+			{ passive: true }
+		);
+
+		/*
+			TOUCH SUPPORT
+		*/
+
+		let touchStartY = 0;
+		let touchCurrentY = 0;
+
+		window.addEventListener(
+			'touchstart',
+			(e) => {
+
+				touchStartY =
+					e.touches[0].clientY;
+
+			},
+			{ passive: true }
+		);
+
+		window.addEventListener(
+			'touchmove',
+			(e) => {
+
+				touchCurrentY =
+					e.touches[0].clientY;
+
+				const delta =
+					touchStartY -
+					touchCurrentY;
+
+				targetScroll +=
+					delta *
+					0.03;
+
+				touchStartY =
+					touchCurrentY;
 
 			},
 			{ passive: true }
@@ -483,7 +513,7 @@
 			);
 
 			/*
-				SCROLL
+				SMOOTH SCROLL
 			*/
 
 			currentScroll +=
@@ -556,30 +586,37 @@
 					);
 
 					/*
-						INFINITE LOOP
+						RELATIVE DEPTH
 					*/
 
 					const relativeZ =
 						mesh.position.z -
 						camera.position.z;
 
+					/*
+						FORWARD LOOP
+					*/
+
 					if (
 						relativeZ > 2
 					) {
 
-						randomizeCard(
-							card,
-							true
-						);
+						mesh.position.z -=
+							corridorLength;
 					}
-                    if (
-                        relativeZ <
-                        -corridorLength
-                    ) {
 
-                        mesh.position.z +=
-                            corridorLength;
-                    }
+					/*
+						BACKWARD LOOP
+					*/
+
+					if (
+						relativeZ <
+						-corridorLength
+					) {
+
+						mesh.position.z +=
+							corridorLength;
+					}
 
 					/*
 						DISTANCE
@@ -629,7 +666,7 @@
 							0.25;
 
 					/*
-						DEPTH SCALE
+						FINAL SCALE
 					*/
 
 					const depthScale =
@@ -639,10 +676,10 @@
 								(
 									1 -
 									distance *
-										0.008
+										0.006
 								),
 							0.4,
-							1
+							1.2
 						);
 
 					mesh.scale.set(
@@ -675,6 +712,7 @@
 ></div>
 
 <style>
+
 	.three-container {
 
 		position: fixed;
@@ -686,6 +724,9 @@
 
 		overflow: hidden;
 
+		touch-action: none;
+
 		z-index: 0;
 	}
+
 </style>
