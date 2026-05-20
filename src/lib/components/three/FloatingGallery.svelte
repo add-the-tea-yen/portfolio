@@ -19,8 +19,8 @@
 		scene.fog =
 			new THREE.Fog(
 				0xf3f3f3,
-				10,
-				65
+				8,
+				60
 			);
 
 		/*
@@ -97,7 +97,7 @@
 		const init = async () => {
 
 			/*
-				AUTO IMPORT IMAGES
+				IMAGES
 			*/
 
 			const imageModules =
@@ -110,10 +110,6 @@
 					}
 				);
 
-			/*
-				IMAGE URLS
-			*/
-
 			const imageUrls =
 				Object.values(
 					imageModules
@@ -125,7 +121,7 @@
 					) as string[];
 
 			/*
-				LOAD TEXTURES
+				TEXTURES
 			*/
 
 			const loader =
@@ -160,7 +156,7 @@
 				);
 
 			/*
-				IMAGE COUNT
+				COUNT
 			*/
 
 			const totalCards =
@@ -172,36 +168,24 @@
 
 			const densityFactor =
 				Math.max(
-					0.7,
+					0.8,
 					Math.min(
-						2,
-						totalCards / 30
+						1.8,
+						totalCards / 24
 					)
 				);
 
 			/*
-				SPREAD
+				SCENE SIZE
 			*/
 
 			const radialSpread =
-				(isMobile ? 2.2 : 4.2) *
+				(isMobile ? 3 : 5.5) *
 				densityFactor;
-
-			/*
-				CORRIDOR
-			*/
 
 			const corridorLength =
-				(isMobile ? 24 : 46) *
+				(isMobile ? 22 : 40) *
 				densityFactor;
-
-			/*
-				SPACING
-			*/
-
-			const spacing =
-				corridorLength /
-				totalCards;
 
 			/*
 				CARD TYPE
@@ -222,70 +206,84 @@
 			const cards: Card[] = [];
 
 			/*
-				RANDOMIZE
+				COMPOSITION
 			*/
 
 			function randomizeCard(
-				card: Card
+				card: Card,
+				index: number
 			) {
 
 				const {
 					mesh
 				} = card;
 
-				const angle =
-					Math.random() *
-					Math.PI *
-					2;
-
-				const radius =
-					radialSpread *
-					(
-						0.2 +
-						Math.random() *
-							0.8
-					);
-
-				mesh.position.x =
-					Math.cos(angle) *
-					radius;
-
-				mesh.position.y =
-					(Math.random() -
-						0.5) *
-					(isMobile ? 2.4 : 3.8);
-
 				/*
-					SUBTLE OFFSET
+					DEPTH
 				*/
 
-				mesh.position.x +=
-					(Math.random() -
-						0.5) *
-					0.25;
+				const t =
+					index / totalCards;
 
-				mesh.position.y +=
-					(Math.random() -
-						0.5) *
-					0.25;
+				const z =
+					-Math.pow(
+						t,
+						0.82
+					) *
+					corridorLength;
+
+				mesh.position.z = z;
+
+				/*
+					SPREAD
+				*/
+
+				const spread =
+					(1 - t) *
+					radialSpread;
+
+				mesh.position.x =
+					(Math.random() - 0.5) *
+					spread;
+
+				mesh.position.y =
+					(Math.random() - 0.5) *
+					(isMobile ? 3 : 5);
+
+				/*
+					PARALLAX
+				*/
+
+				mesh.position.x *=
+					1 +
+					Math.abs(z) *
+						0.03;
 
 				/*
 					ROTATION
 				*/
 
 				mesh.rotation.z =
-					(Math.random() -
-						0.5) *
-					0.08;
+					(Math.random() - 0.5) *
+					0.05;
+
+				mesh.rotation.x =
+					(Math.random() - 0.5) *
+					0.04;
+
+				mesh.rotation.y =
+					(Math.random() - 0.5) *
+					0.04;
 
 				/*
 					SCALE
 				*/
 
 				card.baseScale =
+					1.2 -
+					t * 0.45 +
 					Math.random() *
-						0.15 +
-					0.83;
+						0.08;
 			}
 
 			/*
@@ -305,13 +303,13 @@
 					tex.image;
 
 				/*
-					IMAGE SIZE
+					SCALE
 				*/
 
 				const scale =
 					isMobile
-						? 0.00092
-						: 0.00115;
+						? 0.00125
+						: 0.00155;
 
 				let width =
 					image.width *
@@ -327,8 +325,8 @@
 
 				const maxHeight =
 					isMobile
-						? 1.1
-						: 1.9;
+						? 1.8
+						: 2.8;
 
 				if (
 					height > maxHeight
@@ -367,22 +365,6 @@
 						material
 					);
 
-				/*
-					EVEN DEPTH DISTRIBUTION
-				*/
-
-				mesh.position.z =
-					-(i * spacing);
-
-				/*
-					SUBTLE RANDOM OFFSET
-				*/
-
-				mesh.position.z +=
-					(Math.random() - 0.5) *
-					spacing *
-					0.6;
-
 				scene.add(mesh);
 
 				const card: Card = {
@@ -390,17 +372,17 @@
 					mesh,
 					material,
 
-					baseScale:
-						Math.random() *
-							0.15 +
-						0.83,
+					baseScale: 1,
 
 					floatOffset:
 						Math.random() *
 						1000
 				};
 
-				randomizeCard(card);
+				randomizeCard(
+					card,
+					i
+				);
 
 				cards.push(card);
 			}
@@ -426,7 +408,7 @@
 							0.5
 						) *
 						Math.PI *
-						0.25;
+						0.18;
 
 					targetPitch =
 						(
@@ -434,7 +416,7 @@
 							window.innerHeight -
 							0.5
 						) *
-						0.2;
+						0.12;
 				}
 			);
 
@@ -445,28 +427,23 @@
 			let targetScroll = 0;
 			let currentScroll = 0;
 
-			/*
-				DESKTOP WHEEL
-			*/
-
 			window.addEventListener(
 				'wheel',
 				(e) => {
 
 					targetScroll +=
 						e.deltaY *
-						0.016;
+						0.012;
 
 				},
 				{ passive: true }
 			);
 
 			/*
-				TOUCH SUPPORT
+				TOUCH
 			*/
 
 			let touchStartY = 0;
-			let touchCurrentY = 0;
 
 			window.addEventListener(
 				'touchstart',
@@ -483,19 +460,19 @@
 				'touchmove',
 				(e) => {
 
-					touchCurrentY =
+					const currentY =
 						e.touches[0].clientY;
 
 					const delta =
 						touchStartY -
-						touchCurrentY;
+						currentY;
 
 					targetScroll +=
 						delta *
 						0.03;
 
 					touchStartY =
-						touchCurrentY;
+						currentY;
 
 				},
 				{ passive: true }
@@ -558,21 +535,21 @@
 						targetYaw -
 						currentYaw
 					) *
-					0.05;
+					0.04;
 
 				currentPitch +=
 					(
 						targetPitch -
 						currentPitch
 					) *
-					0.05;
+					0.04;
 
 				camera.lookAt(
 					Math.sin(
 						currentYaw
 					),
 					-currentPitch,
-					camera.position.z - 5
+					camera.position.z - 6
 				);
 
 				/*
@@ -589,16 +566,16 @@
 						} = card;
 
 						/*
-							FLOAT
+							SUBTLE FLOAT
 						*/
 
 						mesh.position.y +=
 							Math.sin(
 								Date.now() *
-									0.0007 +
+									0.0005 +
 									floatOffset
 							) *
-								0.0006;
+								0.0005;
 
 						/*
 							FACE CAMERA
@@ -609,13 +586,13 @@
 						);
 
 						/*
-							INFINITE LOOP
+							INFINITE DEPTH
 						*/
 
 						if (
 							mesh.position.z -
 							camera.position.z >
-							spacing
+							2
 						) {
 
 							mesh.position.z -=
@@ -642,7 +619,7 @@
 							);
 
 						/*
-							DEPTH OPACITY
+							OPACITY
 						*/
 
 						const opacity =
@@ -650,10 +627,10 @@
 								1 -
 									(
 										distance -
-										3
+										4
 									) /
-										16,
-								0,
+										20,
+								0.15,
 								1
 							);
 
@@ -661,39 +638,19 @@
 							opacity;
 
 						/*
-							CENTER SMALLER
-						*/
-
-						const centerFactor =
-							THREE.MathUtils.clamp(
-								Math.abs(
-									mesh.position.x
-								) /
-									radialSpread,
-								0,
-								1
-							);
-
-						const centerScale =
-							0.75 +
-							centerFactor *
-								0.25;
-
-						/*
-							FINAL SCALE
+							SCALE
 						*/
 
 						const depthScale =
 							THREE.MathUtils.clamp(
 								card.baseScale *
-									centerScale *
 									(
 										1 -
 										distance *
-											0.006
+											0.0025
 									),
-								0.4,
-								1.2
+								0.75,
+								1.8
 							);
 
 						mesh.scale.set(
@@ -753,4 +710,8 @@
 		z-index: 0;
 	}
 
+	canvas {
+
+		display: block;
+	}
 </style>
