@@ -35,15 +35,15 @@
 	<div class="links">
 
 		<a href={resolve('/')}>
-			link1
+			projects
 		</a>
 
-		<a href={resolve('/')}>
-			link2
+		<a href={'https://www.instagram.com/darbdardehlavi'}>
+			instagram
 		</a>
 
-		<a href={resolve('/')}>
-			link3
+		<a href='/portfolio.pdf' download="portfolio.pdf">
+			download
 		</a>
 
 	</div>
@@ -146,7 +146,7 @@
 
 	.links {
 
-		margin-top: 0.8rem;
+		margin-top: 1.7rem;
 
 		display: flex;
 
